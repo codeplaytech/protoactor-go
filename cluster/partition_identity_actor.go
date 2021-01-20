@@ -81,7 +81,8 @@ func (p *partitionIdentityActor) onStart(ctx actor.Context) {
 }
 
 func (p *partitionIdentityActor) onStopped(ctx actor.Context) {
-	plog.Info("Stopped PartitionIdentity", p.logPartition)
+	addr := p.PID().GetAddress()
+	plog.Info("Stopped PartitionIdentity", p.logPartition, log.String("address", addr))
 }
 
 func (p *partitionIdentityActor) onTimeout(msg *actor.ReceiveTimeout, ctx actor.Context) {
