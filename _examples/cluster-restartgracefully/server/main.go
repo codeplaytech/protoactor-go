@@ -50,10 +50,6 @@ func main() {
 
 func startNode(port int, provider string, timeout time.Duration) {
 	plog.Info("press 'CTRL-C' to shutdown server.")
-	shared.CalculatorFactory(func() shared.Calculator {
-		return &shared.CalcGrain{}
-	})
-
 	var cp cluster.ClusterProvider
 	var err error
 	switch provider {
@@ -69,11 +65,7 @@ func startNode(port int, provider string, timeout time.Duration) {
 		panic(err)
 	}
 
-	kind := cluster.NewKind("Calculator", actor.PropsFromProducer(func() actor.Actor {
-		return &shared.CalculatorActor{
-			Timeout: timeout,
-		}
-	}))
+	kind := shared.Kind
 	remoteCfg := remote.Configure("127.0.0.1", port)
 	cfg := cluster.Configure("cluster-restartgracefully", cp, remoteCfg, kind)
 	_cluster = cluster.New(system, cfg)

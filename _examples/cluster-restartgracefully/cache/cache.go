@@ -16,7 +16,7 @@ func init() {
 	var addr = "127.0.0.1:6379"
 	rds = redis.NewClient(&redis.Options{
 		Addr:        addr,
-		DialTimeout: 1 * time.Second,
+		DialTimeout: 6 * time.Second,
 	})
 	if err := rds.Ping().Err(); err != nil {
 		log.Printf("no redis err=%v", err)

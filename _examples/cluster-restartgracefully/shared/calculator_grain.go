@@ -2,10 +2,26 @@ package shared
 
 import (
 	"cluster-restartgracefully/cache"
+	"time"
+
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/AsynkronIT/protoactor-go/cluster"
 	"github.com/AsynkronIT/protoactor-go/log"
 )
+
+var (
+	Kind = cluster.NewKind("Calculator", actor.PropsFromProducer(func() actor.Actor {
+		return &CalculatorActor{
+			Timeout: 10 * time.Second,
+		}
+	}))
+)
+
+func init() {
+	CalculatorFactory(func() Calculator {
+		return &CalcGrain{}
+	})
+}
 
 type CalcGrain struct {
 	cluster.Grain
