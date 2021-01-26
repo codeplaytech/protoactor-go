@@ -38,7 +38,7 @@ func main() {
 		switch sig {
 		case syscall.SIGINT:
 			plog.Info("Shutdown...")
-			// _cluster.Shutdown(true)
+			_cluster.Shutdown(true)
 			plog.Info("Shutdown ok")
 			time.Sleep(time.Second)
 			os.Exit(0)
