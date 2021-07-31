@@ -3,7 +3,14 @@ ttl:=10s
 loops:=10000
 clients:=10
 interval:=0ms
-env=prod
+env:=prod
+
+root_dir:=$(CURDIR)
+
+protoc:=docker run --rm -it \
+	-v $(root_dir):/cluster-restartgracefully \
+	-w /cluster-restartgracefully \
+	cupen/protoc:latest
 
 start:
 	tmux new-session -d -s eg
@@ -43,4 +50,8 @@ stop:
 
 proto:
 	protoc -I=.  --gogoslick_out=. shared/*.proto
-	protoc -I=.  --gograinv2_out=.   shared/*.proto
+	protoc -I=.  --gograinv2_out=. shared/*.proto
+
+proto-bydocker:
+	$(protoc) -I=.  --gogoslick_out=. shared/*.proto
+	$(protoc) -I=.  --gograinv2_out=. shared/*.proto
