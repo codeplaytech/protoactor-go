@@ -11,4 +11,5 @@ require (
 	github.com/gogo/protobuf v1.3.2
 	github.com/onsi/ginkgo v1.16.1 // indirect
 	github.com/onsi/gomega v1.11.0 // indirect
+	github.com/stretchr/testify v1.7.0
 )
