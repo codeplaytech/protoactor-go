@@ -64,3 +64,14 @@ docker-env:
 		--entrypoint /bin/bash \
 		cupen/protoc:3.9.1-1
 # }}}
+
+# {{{ examples
+examples := $(wildcard $(CURDIR)/_examples/*/)
+
+update-examples:
+	@echo "go mod tidy"
+	@for d in $(examples); do \
+		echo $$d ; \
+		cd $$d && go mod tidy ; \
+	done 
+# }}}
