@@ -104,7 +104,10 @@ func (p *partitionIdentityActor) handleActivationRequest(msg *ActivationRequest,
 	if ownerAddr != p.self.Address {
 		ownerPID := p.partitionKind.PidOfIdentityActor(ownerAddr)
 		ctx.Forward(ownerPID)
-		_log.Debug("handleActivationRequest", log.PID("forwardTo", ownerPID))
+		_log.Debug("handleActivationRequest",
+			log.PID("forwardTo", ownerPID),
+			log.Int("chash.size", p.chash.Size()),
+			log.String("chash.dump", p.chash.Dump()))
 		return
 	}
 
