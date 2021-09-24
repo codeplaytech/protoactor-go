@@ -101,11 +101,18 @@ func (p *partitionIdentityActor) handleActivationRequest(msg *ActivationRequest,
 	}
 	// other member
 	ownerAddr := p.chash.Get(grainId.Identity)
-	if ownerAddr != p.self.Address {
-		ownerPID := p.partitionKind.PidOfIdentityActor(ownerAddr)
-		ctx.Forward(ownerPID)
-		_log.Debug("handleActivationRequest", log.PID("forwardTo", ownerPID))
-		return
+	if msg.ForwardCount > 0 {
+		msg.ForwardCount--
+		if ownerAddr != p.self.Address {
+			ownerPID := p.partitionKind.PidOfIdentityActor(ownerAddr)
+			msg.ForwardCount++
+			ctx.Forward(ownerPID)
+			_log.Debug("handleActivationRequest",
+				log.PID("forwardTo", ownerPID),
+				log.Int("chash.size", p.chash.Size()),
+				log.Object("chash.dump", p.chash.Dump()))
+			return
+		}
 	}
 
 	// self
@@ -123,15 +130,7 @@ func (p *partitionIdentityActor) handleActivationTerminated(msg *ActivationTermi
 	// clean cache
 	key := msg.ClusterIdentity.AsKey()
 	p.lookup.Remove(key)
-
-	ownerAddr := p.chash.Get(msg.ClusterIdentity.Identity)
-	if ownerAddr != p.self.Address {
-		ownerPid := p.partitionKind.PidOfIdentityActor(ownerAddr)
-		ctx.Forward(ownerPid)
-		plog.Debug("Terminated", p.logPartition, log.String("owner", ownerAddr), log.String("grain", key))
-		return
-	}
-	plog.Debug("Terminated", p.logPartition, log.String("owner", "self"), log.String("grain", key))
+	plog.Debug("ActivationTerminated", p.logPartition, log.String("grain", key))
 }
 
 func (p *partitionIdentityActor) handleClusterTopology(msg *ClusterTopology, ctx actor.Context) {
@@ -159,12 +158,13 @@ func (p *partitionIdentityActor) handleClusterTopology(msg *ClusterTopology, ctx
 				plog.Error("Invalid IdentityHandoverResponse", p.logPartition, log.PID("placement", placementPid), log.Error(err))
 				return
 			}
-			switch resp := _resp.(type) {
-			case *IdentityHandoverResponse:
+
+			if resp, ok := _resp.(*IdentityHandoverResponse); ok {
 				p.takeOwnership(resp)
-			default:
+			} else {
 				plog.Error("Invalid IdentityHandoverResponse", p.logPartition, log.TypeOf("type", msg), log.PID("from", placementPid))
 			}
+
 		}()
 	}
 	wg.Wait()
@@ -239,12 +239,11 @@ func (p *partitionIdentityActor) spawn(msg *ActivationRequest, context actor.Con
 	// Await SpawningProcess
 	context.AwaitFuture(spawning.Future, spawnCallback)
 	// Perform Spawning
-	go p.spawning(spawning.PID(), msg, context, 3)
+	p.spawning(spawning.PID(), msg, context, 3)
 }
 
 func (p *partitionIdentityActor) spawning(spawningPID *actor.PID, msg *ActivationRequest, context actor.Context, retryCount int) {
 	// for i := 0; i < retryCount; i++ {
-	// ownerAddr := p.cluster.MemberList.getPartitionMemberV2(msg.ClusterIdentity)
 	ownerAddr := p.chash.Get(msg.ClusterIdentity.Identity)
 	if ownerAddr == "" {
 		context.Send(spawningPID, &ActivationResponse{Pid: nil})

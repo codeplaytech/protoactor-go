@@ -11,6 +11,7 @@ import (
 
 type partitionPlacementActor struct {
 	cluster      *Cluster
+	members      []*Member
 	_actors      map[string]GrainMeta
 	chash        chash.ConsistentHash
 	spawns       map[string]spawnTask
@@ -112,10 +113,19 @@ func (p *partitionPlacementActor) handleTerminated(msg *actor.Terminated, ctx ac
 	}
 	delete(p._actors, actorKey)
 
-	ownerAddr := p.chash.Get(req.ClusterIdentity.Identity)
-	ownerPid := p.partionKind.PidOfIdentityActor(ownerAddr)
-	ctx.Send(ownerPid, req)
-	plog.Debug("handleTerminated", p.logPartition, log.String("status", "OK"), log.String("grain", actorKey))
+	// ownerAddr := p.chash.Get(req.ClusterIdentity.Identity)
+	// ownerPid := p.partionKind.PidOfIdentityActor(ownerAddr)
+	// ctx.Send(ownerPid, req)
+	sended := 0
+	p.cluster.MemberList.ForEach(p.partionKind.Kind, func(m *Member) {
+		if m == nil {
+			return
+		}
+		pid := p.partionKind.PidOfIdentityActor(m.Address())
+		ctx.Send(pid, req)
+		sended++
+	})
+	plog.Debug("handleTerminated", p.logPartition, log.String("status", "OK"), log.String("grain", actorKey), log.Int("broadcast", sended))
 }
 
 func (p *partitionPlacementActor) handleIdentityHandoverRequest(msg *IdentityHandoverRequest, ctx actor.Context) {
@@ -146,12 +156,13 @@ func (p *partitionPlacementActor) handlerClusterTopology(msg *ClusterTopology, c
 	}
 	p.lastEventId = msg.EventId
 	p.chash = NewRendezvousV2(msg.Members)
+	p.members = msg.Members
 	return
 }
 
 func (p *partitionPlacementActor) handleActivationRequest(msg *ActivationRequest, ctx actor.Context) {
 	key := msg.ClusterIdentity.AsKey()
-	_log := plog.With(p.logPartition, log.String("grainId", key))
+	_log := plog.With(p.logPartition, log.String("grain", key))
 	_log.Debug("handleActivationRequest")
 	if meta, isExist := p._actors[key]; isExist {
 		ctx.Respond(&ActivationResponse{Pid: meta.PID})

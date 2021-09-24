@@ -177,6 +177,7 @@ func (c *Cluster) Get(name string, kind string) (*actor.PID, remote.ResponseStat
 	req := &ActivationRequest{
 		ClusterIdentity: &grainId,
 		RequestId:       "",
+		ForwardCount:    3,
 	}
 
 	system := c.ActorSystem

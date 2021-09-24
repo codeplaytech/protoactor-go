@@ -78,6 +78,19 @@ func (ml *MemberList) getActivatorMember(kind string) string {
 	return res
 }
 
+func (ml *MemberList) ForEach(kind string, f func(*Member)) {
+	ml.mutex.RLock()
+	defer ml.mutex.RUnlock()
+
+	ms, ok := ml.memberStrategyByKind[kind]
+	if !ok || ms == nil {
+		return
+	}
+	for _, m := range ms.GetAllMembers() {
+		f(m)
+	}
+}
+
 func (ml *MemberList) Length() int {
 	ml.mutex.RLock()
 	defer ml.mutex.RUnlock()
