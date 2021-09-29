@@ -87,6 +87,7 @@ func (p *partitionPlacementActor) handleTerminated(msg *actor.Terminated, ctx ac
 				Pid:             meta.PID,
 				ClusterIdentity: meta.ID,
 				EventId:         meta.EventID,
+				ForwardCount:    3,
 			}
 		}
 	}
@@ -99,6 +100,7 @@ func (p *partitionPlacementActor) handleTerminated(msg *actor.Terminated, ctx ac
 					Pid:             meta.PID,
 					ClusterIdentity: meta.ID,
 					EventId:         meta.EventID,
+					ForwardCount:    3,
 				}
 				actorKey = meta.ID.AsKey()
 				break
