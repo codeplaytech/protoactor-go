@@ -3,6 +3,8 @@ module github.com/AsynkronIT/protoactor-go
 // because etcd/v3 need go 1.16 version
 go 1.16
 
+replace github.com/AsynkronIT/protoactor-go => github.com/cupen/protoactor-go v0.0.0-20220225111934-5440c83f2cef
+
 require (
 	github.com/Workiva/go-datastructures v1.0.53
 	github.com/armon/go-metrics v0.3.0 // indirect
