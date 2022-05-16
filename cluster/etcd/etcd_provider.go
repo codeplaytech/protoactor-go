@@ -39,14 +39,15 @@ type Provider struct {
 	// deregisterCritical time.Duration
 }
 
-func New() (*Provider, error) {
-	return NewWithConfig("/protoactor", clientv3.Config{
+func New(opts ...Option) (*Provider, error) {
+	defaultCfg := clientv3.Config{
 		Endpoints:   []string{"127.0.0.1:2379"},
 		DialTimeout: time.Second * 5,
-	})
+	}
+	return NewWithConfig("/protoactor", defaultCfg, opts...)
 }
 
-func NewWithConfig(baseKey string, cfg clientv3.Config) (*Provider, error) {
+func NewWithConfig(baseKey string, cfg clientv3.Config, opts ...Option) (*Provider, error) {
 	client, err := clientv3.New(cfg)
 	if err != nil {
 		return nil, err
@@ -58,6 +59,9 @@ func NewWithConfig(baseKey string, cfg clientv3.Config) (*Provider, error) {
 		baseKey:       baseKey,
 		members:       map[string]*Node{},
 		cancelWatchCh: make(chan bool),
+	}
+	for _, opt := range opts {
+		opt(p)
 	}
 	return p, nil
 }
