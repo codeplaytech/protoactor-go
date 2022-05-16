@@ -191,7 +191,7 @@ func (p *Provider) keepAliveForever(ctx context.Context) error {
 		if resp == nil {
 			return fmt.Errorf("keep alive failed. resp=%s", resp.String())
 		}
-		// plog.Infof("keep alive %s ttl=%d", p.getID(), resp.TTL)
+		plog.Debug("keep alive", log.String("self", p.getID()), log.Int64("ttl", resp.TTL))
 		if p.shutdown {
 			return nil
 		}
