@@ -16,6 +16,7 @@ type Config struct {
 	TimeoutTime           time.Duration
 	MemberStrategyBuilder func(kind string) MemberStrategy
 	Kinds                 map[string]*actor.Props
+	GrainCallOptions      *GrainCallOptions
 }
 
 func Configure(clusterName string, clusterProvider ClusterProvider, remoteConfig remote.Config, kinds ...*Kind) *Config {
