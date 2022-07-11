@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"fmt"
+	"log"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -88,13 +90,24 @@ func ProtoAst(file *google_protobuf.FileDescriptorProto) *ProtoFile {
 	// let us the go package name
 	pkg.PackageName = packageName
 
+	// build proto message dictionary
 	messages := make(map[string]*ProtoMessage)
 	for _, message := range file.GetMessageType() {
-		m := &ProtoMessage{}
-		m.Name = message.GetName()
-		m.PascalName = MakeFirstLowerCase(m.Name)
+		m := &ProtoMessage{
+			Name:       message.GetName(),
+			PascalName: MakeFirstLowerCase(message.GetName()),
+		}
 		pkg.Messages = append(pkg.Messages, m)
 		messages[m.Name] = m
+		log.Printf("name=%s m=%v", m.Name, m)
+	}
+
+	mustGetMessage := func(m map[string]*ProtoMessage, name string) *ProtoMessage {
+		rs, ok := m[name]
+		if !ok {
+			panic(fmt.Errorf("unknown name of ProtoMessage: %s", name))
+		}
+		return rs
 	}
 
 	for _, service := range file.GetService() {
@@ -110,10 +123,12 @@ func ProtoAst(file *google_protobuf.FileDescriptorProto) *ProtoFile {
 			m.PascalName = MakeFirstLowerCase(m.Name)
 			//		m.InputStream = *method.ClientStreaming
 			//		m.OutputStream = *method.ServerStreaming
+			log.Printf("input:  type=%s package=%s", method.GetInputType(), file.GetPackage())
+			log.Printf("output: type=%s package=%s", method.GetOutputType(), file.GetPackage())
 			input := removePackagePrefix(method.GetInputType(), file.GetPackage())
 			output := removePackagePrefix(method.GetOutputType(), file.GetPackage())
-			m.Input = messages[input]
-			m.Output = messages[output]
+			m.Input = mustGetMessage(messages, input)
+			m.Output = mustGetMessage(messages, output)
 			s.Methods = append(s.Methods, m)
 		}
 	}
@@ -156,4 +171,14 @@ func badToUnderscore(r rune) rune {
 		return r
 	}
 	return '_'
+}
+
+func validateProtoMessage(pm *ProtoMessage) error {
+	if pm == nil {
+		return fmt.Errorf("nil ProtoMessage")
+	}
+	if pm.Name == "" {
+		return fmt.Errorf("empty name of ProtoMessage")
+	}
+	return nil
 }
