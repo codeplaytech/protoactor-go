@@ -102,15 +102,14 @@ func (p *partitionIdentityActor) handleActivationRequest(msg *ActivationRequest,
 	// other member
 	ownerAddr := p.chash.Get(grainId.Identity)
 	if msg.ForwardCount > 0 {
-		msg.ForwardCount--
 		if ownerAddr != p.self.Address {
 			ownerPID := p.partitionKind.PidOfIdentityActor(ownerAddr)
-			msg.ForwardCount++
+			msg.ForwardCount--
 			ctx.Forward(ownerPID)
-			_log.Debug("handleActivationRequest",
-				log.PID("forwardTo", ownerPID),
-				log.Int("chash.size", p.chash.Size()),
-				log.Object("chash.dump", p.chash.Dump()))
+			_log.Warn("handleActivationRequest",
+				log.PID("forward", ownerPID),
+				log.Int("chash.size", p.chash.Size()))
+			// log.Object("chash.dump", p.chash.Dump()))
 			return
 		}
 	}
