@@ -100,20 +100,20 @@ func (p *partitionIdentityActor) handleActivationRequest(msg *ActivationRequest,
 		return
 	}
 	// other member
-	ownerAddr := p.chash.Get(grainId.Identity)
-	if msg.ForwardCount > 0 {
-		if ownerAddr != p.self.Address {
-			ownerPID := p.partitionKind.PidOfIdentityActor(ownerAddr)
-			msg.ForwardCount--
-			ctx.Forward(ownerPID)
-			_log.Warn("handleActivationRequest",
-				log.PID("forward.to", ownerPID),
-				log.Int("forward.count", int(msg.ForwardCount)),
-				log.Int("chash.size", p.chash.Size()))
-			// log.Object("chash.dump", p.chash.Dump()))
-			return
-		}
-	}
+	// ownerAddr := p.chash.Get(grainId.Identity)
+	// if msg.ForwardCount > 0 {
+	// 	if ownerAddr != p.self.Address {
+	// 		ownerPID := p.partitionKind.PidOfIdentityActor(ownerAddr)
+	// 		msg.ForwardCount--
+	// 		ctx.Forward(ownerPID)
+	// 		_log.Warn("handleActivationRequest",
+	// 			log.PID("forward.to", ownerPID),
+	// 			log.Int("forward.count", int(msg.ForwardCount)),
+	// 			log.Int("chash.size", p.chash.Size()))
+	// 		// log.Object("chash.dump", p.chash.Dump()))
+	// 		return
+	// 	}
+	// }
 
 	// self
 	if _pid, ok := p.lookup.Get(key); ok {

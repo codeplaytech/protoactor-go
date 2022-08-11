@@ -275,9 +275,9 @@ func (p *Provider) handleWatchResponse(resp clientv3.WatchResponse) map[string]*
 				continue
 			}
 			if _, ok := p.members[nodeId]; ok {
-				plog.Debug("Update member.", log.String("key", key))
+				plog.Info("Update member.", log.String("key", key))
 			} else {
-				plog.Debug("New member.", log.String("key", key))
+				plog.Info("New member.", log.String("key", key))
 			}
 			changes[nodeId] = node
 		case clientv3.EventTypeDelete:
@@ -285,7 +285,7 @@ func (p *Provider) handleWatchResponse(resp clientv3.WatchResponse) map[string]*
 			if !ok {
 				continue
 			}
-			plog.Debug("Delete member.", log.String("key", key))
+			plog.Info("Delete member.", log.String("key", key))
 			cloned := (*node)
 			cloned.SetAlive(false)
 			changes[nodeId] = &cloned
