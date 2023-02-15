@@ -50,7 +50,7 @@ func Get{{ $service.Name }}GrainClient(c *cluster.Cluster, id string) *{{ $servi
 
 // {{ $service.Name }} interfaces the services available to the {{ $service.Name }}
 type {{ $service.Name }} interface {
-	Init(*cluster.ClusterInit, cluster.GrainContext)
+	Init(cluster.GrainContext, *cluster.ClusterInit)
 	Terminate(cluster.GrainContext)
 	ReceiveDefault(ctx actor.Context)
 	{{ range $method := $service.Methods -}}
@@ -106,7 +106,7 @@ func (a *{{ $service.Name }}Actor) Receive(ctx actor.Context) {
 	case *actor.Started:
 	case *cluster.ClusterInit:
 		a.inner = x{{ $service.Name }}Factory()
-		a.inner.Init(msg, ctx)
+		a.inner.Init(ctx, msg)
 		if a.Timeout > 0 {
 			ctx.SetReceiveTimeout(a.Timeout)
 		}
