@@ -7,9 +7,7 @@ require (
 	github.com/Workiva/go-datastructures v1.0.53
 	github.com/armon/go-metrics v0.3.0 // indirect
 	github.com/cespare/xxhash v1.1.0
-	github.com/chzyer/logex v1.1.10 // indirect
-	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
-	github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1 // indirect
+	github.com/chzyer/readline v1.5.1
 	github.com/couchbase/gocb v1.6.7
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f
 	github.com/emirpasic/gods v1.12.0
